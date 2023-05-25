@@ -9,9 +9,29 @@ headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/53
 def get_stock(): 
     global stock_symbol 
     stock_symbol = input("Enter the stock: ")
-    make_url(stock_symbol) 
+    
+    type_analysis = input("How do you want to Analyze: ")
+    if type_analysis == "google" :
+        make_google_url() 
 
-def make_url(stock_symbol):
+    if type_analysis == "yahoo" :
+        make_yahoo_url() 
+
+
+def make_google_url(stock_symbol):
+    url = f"https://www.google.com/search?q={stock}&tbm=nws"
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {str(e)} please try again: ")
+        get_stock() 
+
+    google_analyze(response.content)
+
+
+def make_yahoo_url(stock_symbol):
     url = f"https://finance.yahoo.com/quote/{stock_symbol}" 
     #print(url)
 
@@ -23,20 +43,20 @@ def make_url(stock_symbol):
         print(f"Error: {str(e)} please try again: ")
         get_stock()
 
-    soup = BeautifulSoup(response.content, 'html.parser')
+
+    yahoo_analyze(response.content)
+
+def yahoo_analyze(response_content): 
+    soup = BeautifulSoup(response_content, 'html.parser')
     articles = soup.find_all('h3')
     news_text = [article.text for article in articles]
-
-    sentiment_analyze(news_text)
-
-def sentiment_analyze(news_text): 
     text = ' '.join(news_text)
     polarity = TextBlob(text).sentiment.polarity
     print(polarity)
 
-
-
-
+def google_analyze(response_content):
+    soup = BeautifulSoup(response_content, 'html.parser')
+    print(soup) 
 
 def main():
     get_stock()
