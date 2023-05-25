@@ -1,8 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
 from textblob import TextBlob
+import yfinance
 
-#features to add (checking to make sure that the ticker is valid)
 
 
 #url setup 
@@ -12,13 +12,31 @@ headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/53
 def get_stock(): 
     global stock_symbol 
     stock_symbol = input("Enter the stock: ")
-    
-    type_analysis = input("How do you want to Analyze: ")
-    if type_analysis == "google" :
-        make_google_url(stock_symbol) 
 
-    if type_analysis == "yahoo" :
-        make_yahoo_url(stock_symbol) 
+    if check_ticker(stock_symbol):
+        type_analysis = input("How do you want to Analyze: ")
+
+        if type_analysis == "google" :
+            make_google_url(stock_symbol) 
+
+        if type_analysis == "yahoo" :
+            make_yahoo_url(stock_symbol) 
+
+    else :
+        print("Invalid Ticker!\n\n")
+        get_stock()
+
+    
+
+
+#using the yfinance library to check if the user input ticker is valid. 
+def check_ticker(stock_symbol):
+    try:
+        stock = yfinance.Ticker(stock_symbol)
+        info = stock.info
+        return True
+    except:
+        return False 
 
 
 def make_google_url(stock_symbol):
