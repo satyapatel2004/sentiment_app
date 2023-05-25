@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 from textblob import TextBlob
 
+#features to add (checking to make sure that the ticker is valid)
+
+
 #url setup 
 headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'}
 
@@ -12,14 +15,14 @@ def get_stock():
     
     type_analysis = input("How do you want to Analyze: ")
     if type_analysis == "google" :
-        make_google_url() 
+        make_google_url(stock_symbol) 
 
     if type_analysis == "yahoo" :
-        make_yahoo_url() 
+        make_yahoo_url(stock_symbol) 
 
 
 def make_google_url(stock_symbol):
-    url = f"https://www.google.com/search?q={stock}&tbm=nws"
+    url = f"https://www.google.com/search?q={stock_symbol}&tbm=nws"
     
     try:
         response = requests.get(url, headers=headers)
@@ -28,7 +31,7 @@ def make_google_url(stock_symbol):
         print(f"Error: {str(e)} please try again: ")
         get_stock() 
 
-    google_analyze(response.content)
+    google_analyze(response)
 
 
 def make_yahoo_url(stock_symbol):
@@ -54,9 +57,16 @@ def yahoo_analyze(response_content):
     polarity = TextBlob(text).sentiment.polarity
     print(polarity)
 
-def google_analyze(response_content):
-    soup = BeautifulSoup(response_content, 'html.parser')
-    print(soup) 
+def google_analyze(response):
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    headlines = soup.find_all('div')
+    headlines_text = [headline.get_text() for headline in headlines]
+
+    headlines_joined = ' '.join(headlines_text)
+
+    polarity = TextBlob(headlines_joined).sentiment.polarity
+    print(polarity)
 
 def main():
     get_stock()
