@@ -2,7 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 from textblob import TextBlob
 import yfinance
-
+import nltk 
+from nltk.probability import FreqDist
 
 
 #url setup 
@@ -38,7 +39,7 @@ def check_ticker(stock_symbol):
     except:
         return False 
 
-
+#makes the google URL 
 def make_google_url(stock_symbol):
     url = f"https://www.google.com/search?q={stock_symbol}&tbm=nws"
     
@@ -51,7 +52,7 @@ def make_google_url(stock_symbol):
 
     google_analyze(response)
 
-
+#makes the yahoo URL 
 def make_yahoo_url(stock_symbol):
     url = f"https://finance.yahoo.com/quote/{stock_symbol}" 
     #print(url)
@@ -67,6 +68,7 @@ def make_yahoo_url(stock_symbol):
 
     yahoo_analyze(response.content)
 
+#analyzes the yahoo information. 
 def yahoo_analyze(response_content): 
     soup = BeautifulSoup(response_content, 'html.parser')
     articles = soup.find_all('h3')
@@ -75,6 +77,7 @@ def yahoo_analyze(response_content):
     polarity = TextBlob(text).sentiment.polarity
     print(polarity)
 
+#analyzes the google information (headlines)
 def google_analyze(response):
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -83,8 +86,26 @@ def google_analyze(response):
 
     headlines_joined = ' '.join(headlines_text)
 
-    polarity = TextBlob(headlines_joined).sentiment.polarity
+    #converting all of the google headlines to lowercase
+    headlines_joined = headlines_joined.lower() 
+
+    #splits into a list. 
+    headlines_list = headlines_joined.split()
+
+    #calculating word frequencies:
+    fdist = FreqDist(headlines_list)
+    flist = fdist.most_common(400)
+
+    jstring = ' '.join(item[0] for item in flist)
+    print(jstring)
+
+    polarity = TextBlob(jstring).sentiment.polarity
     print(polarity)
+
+
+
+
+
 
 def main():
     get_stock()
