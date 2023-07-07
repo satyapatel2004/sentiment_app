@@ -2,119 +2,111 @@ from bs4 import BeautifulSoup
 import requests
 from textblob import TextBlob
 import yfinance
-import nltk 
-from nltk.probability import FreqDist
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+import concurrent.futures
 
 
-#url setup 
-headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'}
+#headers for HTTP requests to "trick" websites into thinking
+#that requests are not coming from a bot. 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+}
 
-#method that handles retrieving the stock from the user. 
-def get_stock(): 
-    global stock_symbol 
-    stock_symbol = input("Enter the stock: ")
-
+#makes sure that the stock is valid: 
+def get_stock(stock_symbol):
     if check_ticker(stock_symbol):
-        type_analysis = input("How do you want to Analyze: ")
+        print("SUCCESS IN getting STOCK")
+        polarity = make_google_url(stock_symbol)
+        return polarity 
 
-        if type_analysis == "google" :
-            make_google_url(stock_symbol) 
+    else:
+        return "ERROR" 
 
-        if type_analysis == "yahoo" :
-            make_yahoo_url(stock_symbol) 
-
-    else :
-        print("Invalid Ticker!\n\n")
-        get_stock()
-
-    
-
-
-#using the yfinance library to check if the user input ticker is valid. 
+# checks the ticker to see if it is valid. 
 def check_ticker(stock_symbol):
     try:
         stock = yfinance.Ticker(stock_symbol)
-        info = stock.info
-        return True
-    except:
-        return False 
 
-#makes the google URL 
+        if stock.info:
+            return True 
+    except:
+        return False
+
+
+#makes the google URL. 
 def make_google_url(stock_symbol):
-    url = f"https://www.google.com/search?q={stock_symbol}&tbm=nws"
-    
+    url = f"https://www.google.com/search?q=site%3Anews.google.com+%22{stock_symbol} stock%22"
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
+        polarity = google_analyze(response.text)
+        return polarity 
     except requests.exceptions.RequestException as e:
-        print(f"Error: {str(e)} please try again: ")
-        get_stock() 
+        return f"Error: {str(e)} please try again: "
 
-    google_analyze(response)
+#filtering only opinionated words 
+def filter_opinionated_words(text):
+    sia = SentimentIntensityAnalyzer()
+    words = nltk.word_tokenize(text)
+    opinionated_words = [word for word in words if sia.polarity_scores(word)['compound'] != 0]
+    return opinionated_words
 
-#makes the yahoo URL 
+
+#formatting a yahoo URL 
 def make_yahoo_url(stock_symbol):
-    url = f"https://finance.yahoo.com/quote/{stock_symbol}" 
-    #print(url)
-
-    try: 
+    url = f"https://finance.yahoo.com/quote/{stock_symbol}"
+    try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-
+        return response.content
     except requests.exceptions.RequestException as e:
         print(f"Error: {str(e)} please try again: ")
         get_stock()
 
 
-    yahoo_analyze(response.content)
-
-#analyzes the yahoo information. 
-def yahoo_analyze(response_content): 
+#Yahoo_analyze takes the response content from a Yahoo HTTP response
+#and conducts a sentiment analysis on it. 
+def yahoo_analyze(response_content):
     soup = BeautifulSoup(response_content, 'html.parser')
     articles = soup.find_all('h3')
     news_text = [article.text for article in articles]
     text = ' '.join(news_text)
+    text = " ".join(c for c in text if c.isalpha())
+    print(text)
     polarity = TextBlob(text).sentiment.polarity
-    print(polarity)
+    return polarity
 
-#analyzes the google information (headlines)
-def google_analyze(response):
-    soup = BeautifulSoup(response.text, 'html.parser')
 
+
+#google_analyze takes the text from the Google HTTP response 
+# and analyzes it for the sentiment using nltk. (it is a private function)
+def google_analyze(response_text):
+    soup = BeautifulSoup(response_text, 'html.parser')
     headlines = soup.find_all('div')
     headlines_text = [headline.get_text() for headline in headlines]
-
     headlines_joined = ' '.join(headlines_text)
-
-    #converting all of the google headlines to lowercase
-    headlines_joined = headlines_joined.lower() 
-
-    #splits into a list. 
-    headlines_list = headlines_joined.split()
-
-    #calculating word frequencies:
-    fdist = FreqDist(headlines_list)
-    flist = fdist.most_common(400)
-
-    jstring = ' '.join(item[0] for item in flist)
-    print(jstring)
-
-    polarity = TextBlob(jstring).sentiment.polarity
-    print(polarity)
+    opinionated = filter_opinionated_words(headlines_joined)
+    opinionated = set(opinionated)
+    opstring = ' '.join(opinionated)
+    polarity = TextBlob(opstring).sentiment.polarity
 
 
+    arr = [opstring, polarity] 
 
+    return arr
 
+def get_average_sentiment():
+    stocks = ["aapl", "msft", "goog", "amzn", "nvda", "tsla"]
+    sentimentlist = []
 
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(make_google_url, stock) for stock in stocks]
+        for future in concurrent.futures.as_completed(futures):
+            response_text = future.result()
+            polarity = google_analyze(response_text)
+            sentimentlist.append(polarity)
 
-def main():
-    get_stock()
-
-main()
-
-
-
-
-
-
+    average = sum(sentimentlist) / len(sentimentlist)
+    print("AVERAGE: ", average) 
 

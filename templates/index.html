@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Sentiment Analyzer</title>
+    <style>
+        /* Additional inline styles */
+        body {
+            font-family: 'Helvetica';
+            
+        }
+        h1 {
+            text-align: center;
+            font-family: Helvetica;
+            font-size:55px;
+            color:darkolivegreen; 
+            margin-bottom : 5px;
+        }
+        form {
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main {
+            margin: auto;
+            margin-bottom: 5px;
+            width: 100%; 
+            padding: 10px; 
+            position:absolute;  
+            top:30%;
+ 
+        }
+
+        .text-field {
+            padding: 9px;
+            font-size: 16px;
+            color: #5A5A5A; 
+            text-transform: uppercase;
+            border: 1px solid #ccc;
+            border-radius: 4px; 
+        }
+
+
+        .submit-button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffffff;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: #45a049;
+        }
+
+        .information {
+            width: 800px;
+            font-family: "Helvetica Light";
+            font-weight: 300;
+            text-align: center;
+            height: auto; 
+                position: relative;
+            top: 560px;
+            margin-top: -10px;
+            padding: 10px; 
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 18px;
+            color: #787878;
+        }
+
+</style>
+
+</head>
+<body>
+    <div class="container"> 
+        <div class ="main"> 
+            <h1>Sentiment Analyzer</h1>
+                <form action="/process" method="POST">
+                    <input type="text" name="input_field" class="text-field" placeholder="Enter Stock Ticker">
+                    <input type="submit" value="Submit" class="submit-button">
+                </form>
+        </div>
+
+        <div class="information">
+            <p> Enter a stock ticker (case insensitive) to get the Google news search result polarity related to the stock
+                The algorithm searches the top 1000 google search results and filters the common high polarity words
+                to return a polarity score. 
+            </p> 
+        </div>
+
+    </div>
+
+</body>
+
+
+</html>
