@@ -5,65 +5,98 @@
     <style>
         body {
             font-family: 'Helvetica';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         h1 {
             text-align: center;
             font-family: Helvetica;
             font-size:55px;
-            color:darkolivegreen; 
-            margin-bottom : 5px;
+            color:darkolivegreen;
         }
+
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            width: 800px;
+            box-sizing: border-box;
+        }
+    
+        .keywords, .error {
+            width: 100%;
+            font-family: "Helvetica Light";
+            font-weight: 300;
+            text-align: center;
+            padding: 10px; 
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 18px;
+            color: #787878;
+            margin-top: 20px;
         }
 
         .result {
-            width: 800px;
-            font-family: "Helvetica Light";
-            font-weight: 300;
+            font-size: 30px;
+            font-family: 'Helvetica Light';
+            border-radius: 10px; 
+            border: 4px solid rgb(110, 134, 69);
+            padding-left: 50px;
+            padding-right: 50px; 
+            background-color: rgb(198, 213, 171);  /* Light Blue */
+            color: #256a36;  /* Dark Blue */
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+
+        }
+
+        .result:hover {
+            transform: scale(1.05);
+        }
+
+        .emoji img {
+            width: 100px;
+            height: auto;
+        }
+
+        .emoji {
             text-align: center;
-            height: auto; 
-                position: relative;
-            top: 560px;
-            margin-top: -10px;
-            padding: 10px; 
-            background-color: #f1f1f1;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 18px;
-            color: #787878;
+            padding-bottom: 20px;
         }
 
 
-        .keywords {
-            width: 800px;
-            font-family: "Helvetica Light";
-            font-weight: 300;
-            text-align: center;
-            height: auto; 
-                position: relative;
-            top: 560px;
-            margin-top: -10px;
-            padding: 10px; 
-            background-color: #f1f1f1;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 18px;
-            color: #787878;
+        .error {
+            background-color: #ffcccc;
+            color: #cc0000;
+            border-color: #cc0000;
         }
 
     </style>
 </head>
 <body>
     <div class="container"> 
-        <h1>Stock Analysis Result</h1>
+        <h1>Result: </h1>
     
         {% if valid %}
             <div class="result">
-                <p>{{ input_data }} POLARITY: {{ polarity }}</p>
+                <p>{{ input_data }}'s Polarity: {{ polarity }}%</p>
+
+                <div class="emoji">
+                    {% if polarity > 0 %}
+                        <img src="{{ url_for('static', filename='happy.png') }}" alt="Happy">
+                    {% elif polarity < 0 %}
+                        <img src="{{ url_for('static', filename='sad.png') }}" alt="Sad">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='neutral.png') }}" alt="Neutral">
+                    {% endif %}
+                </div>
             </div>
     
             <div class="keywords">
@@ -71,7 +104,7 @@
             </div> 
     
         {% else %}
-            <p class="error">INCORRECT INPUT</p>
+            <p class="error">Incorrect Input!</p>
         {% endif %}
     </div>
 </body>

@@ -15,11 +15,16 @@ def process():
     
     if valid:
         arr = get_stock(input_data)
-        polarity = arr[1]
+        polarity = arr[1] * 100
         polarity = round(polarity, 2)
         keywords = arr[0]
+        keywords_list = keywords.split() 
 
+        keywords_list = [word.capitalize() for word in keywords_list]
+        keywords = ', '.join(keywords_list)
 
+        
+            
     else:
         polarity = None
         keywords = None
