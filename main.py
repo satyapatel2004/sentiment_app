@@ -16,7 +16,6 @@ headers = {
 #makes sure that the stock is valid: 
 def get_stock(stock_symbol):
     if check_ticker(stock_symbol):
-        print("SUCCESS IN getting STOCK")
         polarity = make_google_url(stock_symbol)
         return polarity 
 
@@ -32,7 +31,6 @@ def check_ticker(stock_symbol):
             return True 
         
     except:
-        print(stock.info)
         return False
 
 
@@ -63,7 +61,6 @@ def make_yahoo_url(stock_symbol):
         response.raise_for_status()
         return response.content
     except requests.exceptions.RequestException as e:
-        print(f"Error: {str(e)} please try again: ")
         get_stock()
 
 
@@ -75,7 +72,6 @@ def yahoo_analyze(response_content):
     news_text = [article.text for article in articles]
     text = ' '.join(news_text)
     text = " ".join(c for c in text if c.isalpha())
-    print(text)
     polarity = TextBlob(text).sentiment.polarity
     return polarity
 
@@ -110,5 +106,4 @@ def get_average_sentiment():
             sentimentlist.append(polarity)
 
     average = sum(sentimentlist) / len(sentimentlist)
-    print("AVERAGE: ", average) 
 
