@@ -30,7 +30,9 @@ def check_ticker(stock_symbol):
 
         if stock.info:
             return True 
+        
     except:
+        print(stock.info)
         return False
 
 

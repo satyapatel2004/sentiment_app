@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from main import * 
 
 app = Flask(__name__)
@@ -22,9 +22,11 @@ def process():
 
     else:
         polarity = None
+        keywords = None
 
 
     input_data = input_data.upper() 
+
 
     return render_template('result.html', valid=valid, input_data=input_data, polarity=polarity, keywords=keywords)
 
