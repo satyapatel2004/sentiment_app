@@ -6,7 +6,7 @@ import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 import concurrent.futures
 
-
+import nltk
 nltk.download('vader_lexicon')
 
 #headers for HTTP requests to "trick" websites into thinking
